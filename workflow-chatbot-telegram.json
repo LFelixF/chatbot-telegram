@@ -1,0 +1,309 @@
+{
+  "name": "Desafio Prático: Bot de Clima no Telegram com N8N",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6c61bd61-f1dd-4477-b345-658904137acc",
+      "name": "Telegram Trigger",
+      "webhookId": "7f865681-e9fb-4e91-8771-d6daf795b7a2",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZmjxyCEXN7H0DXQx",
+          "name": "Telegram - Challenge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=http://api.openweathermap.org/geo/1.0/direct?",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.queue }}"
+            },
+            {
+              "name": "appid",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        480,
+        0
+      ],
+      "id": "4011f86f-cac3-459b-bcb1-5f05193817f7",
+      "name": "OpenWeather - Lat/Lon",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.openweathermap.org/data/2.5/weather?",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "lat",
+              "value": "={{ $json.lat }}"
+            },
+            {
+              "name": "lon",
+              "value": "={{ $json.lon }}"
+            },
+            {
+              "name": "appid",
+              "value": ""
+            },
+            {
+              "name": "units",
+              "value": "metric"
+            },
+            {
+              "name": "lang",
+              "value": "pt_br"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        720,
+        0
+      ],
+      "id": "c2db5e27-3354-40d9-bdd2-fd23c976a1ce",
+      "name": "OpenWeather - Previsão",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.mensagem }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1232,
+        -160
+      ],
+      "id": "ce844b0d-6ef4-4a2b-bc28-7945d30397a1",
+      "name": "Send a text message",
+      "webhookId": "79edcbee-3227-4c2d-9128-ab1b5982779c",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZmjxyCEXN7H0DXQx",
+          "name": "Telegram - Challenge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "61e85b00-c057-433b-8290-9086c39a4bd2",
+              "name": "mensagem",
+              "value": "=🌤️ A temperatura em {{ $json.name }} é de {{ $json.main.temp.floor() }}°C.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1024,
+        -160
+      ],
+      "id": "8aa5f5cd-511a-442b-90b4-05b1d69924a1",
+      "name": "Editando Mensagem"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "❌ Cidade não encontrada. Use o formato Cidade,UF,BR (ex.: São Paulo,SP,BR).",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        128
+      ],
+      "id": "452705ac-c3a8-417f-95cd-2a3b6a8f3a90",
+      "name": "Send a text message1",
+      "webhookId": "a5af5f6b-08bb-4c3c-ba75-c93132bb58a0",
+      "credentials": {
+        "telegramApi": {
+          "id": "ZmjxyCEXN7H0DXQx",
+          "name": "Telegram - Challenge"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4b71cdd1-646e-4379-a5a8-caa2566a057b",
+              "name": "queue",
+              "value": "={{ $json.message.text.split(',')[0]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        0
+      ],
+      "id": "7a9f528b-77e2-45c4-a80c-f93e4c80cbf4",
+      "name": "Atributo Queue"
+    },
+    {
+      "parameters": {
+        "content": "```\nDesafio Prático: Bot de Clima no Telegram com N8N\n```",
+        "height": 576,
+        "width": 1504,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -64,
+        -256
+      ],
+      "typeVersion": 1,
+      "id": "10cefb9d-8ab2-47b5-a547-d1b5178266d0",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Atributo Queue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeather - Lat/Lon": {
+      "main": [
+        [
+          {
+            "node": "OpenWeather - Previsão",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeather - Previsão": {
+      "main": [
+        [
+          {
+            "node": "Editando Mensagem",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Editando Mensagem": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atributo Queue": {
+      "main": [
+        [
+          {
+            "node": "OpenWeather - Lat/Lon",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "99156029-a30d-41c3-9115-1684393162ff",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b423f68b6b737d29d93fc51e7a26f91d20b91cd49ec46d444a7a884ae7bce41"
+  },
+  "nodeGroups": [],
+  "id": "ysiqdiHteZbjIbSq",
+  "tags": [
+    {
+      "name": "challenge",
+      "id": "41KENjFnLrfsus5S",
+      "updatedAt": "2026-06-23T01:57:54.464Z",
+      "createdAt": "2026-06-23T01:57:54.464Z"
+    },
+    {
+      "updatedAt": "2026-06-13T06:15:06.789Z",
+      "createdAt": "2026-06-13T06:15:06.789Z",
+      "id": "bFjhDsBYMFsrJFex",
+      "name": "bot"
+    },
+    {
+      "updatedAt": "2026-06-12T02:23:23.598Z",
+      "createdAt": "2026-06-12T02:23:23.598Z",
+      "id": "RLQ92ugLlPcPINxM",
+      "name": "telegram"
+    },
+    {
+      "updatedAt": "2026-05-06T23:28:58.128Z",
+      "createdAt": "2026-05-06T23:28:58.128Z",
+      "id": "xXSW2Hnx3dOrmvnE",
+      "name": "study"
+    }
+  ]
+}
